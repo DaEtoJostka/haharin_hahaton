@@ -74,8 +74,8 @@ class Model:
         '''
         loading (if need it) models from HuggingFace and initialization of tokenizer and model
         '''
-        self.tokenizer = BertTokenizer.from_pretrained('DeepPavlov/rubert-base-cased-conversational')
-        self.model = torch.load('model_for_hackaton.pt', map_location=torch.device('cpu'))
+        self.tokenizer = self.tokenizer = BertTokenizer.from_pretrained('data/tokenizer')
+        self.model = torch.load('model_for_hackaton.pt', map_location=torch.device(device))
         self.model.to(device)
         self.model.eval()
 
