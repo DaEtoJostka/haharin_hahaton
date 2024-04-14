@@ -4,6 +4,7 @@ import re
 from transformers import BertTokenizer, BertForTokenClassification
 import torch
 from torch import cuda
+import json
 
 class Pipeline:
     def __init__(self):
@@ -164,24 +165,35 @@ id2label: dict = {0: 'O', 1: 'B-skill', 2: 'I-skill'}
 EntityScoreType = tp.Tuple[int, float]  # (entity_id, entity_score)
 MessageResultType = tp.List[EntityScoreType]  # list of entity scores
 
-# Assuming CSV file named "company_names.csv"
-df = pd.read_csv("final_solution\company_names2.csv", sep=";")
 
-def process_mentions(mentions):
+def process_data(input_data):
   """
-  This function processes a list of mentions and returns a list of corresponding company indices with duplicates removed.
+  Processes input data, removes duplicates, and groups indices by lists.
+
+Args:
+    input_data: A list of lists containing company mentions.
+    mapping_file: Path to the json file with the mapping between mentions and indices.
+
+  Returns:
+    A list of lists with company indices, grouped by the original lists, 
+    without duplicates within sublists.
   """
-  company_indices = []
-  for mention_list in mentions:
-    indices = []
-    for mention in mention_list:
-      # Find rows where any of the synonyms match the current mention
-      matching_rows = df[df['l_syns'].str.contains(mention, case=False)]
-      indices.extend(matching_rows['issuerid'].tolist())
-    # Remove duplicates while preserving order
-    unique_indices = list(dict.fromkeys(indices))
-    company_indices.append(unique_indices)
-  return company_indices
+  # Read json dictionary
+  with open("final_solution\dict_of_comp.json", encoding='utf-8') as f:
+    company_mapping = json.load(f)
+
+  result = []
+  for company_list in input_data:
+    unique_companies = set(company.lower() for company in company_list)
+    company_indices = []
+    for company in unique_companies:
+      if company in company_mapping:
+        index = int(company_mapping[company])
+        if not any(index in sublist for sublist in company_indices):  # Проверка на дубликаты
+          company_indices.append([index])
+    result.append(company_indices)
+
+  return result
 
 def score_texts(
     messages: tp.Iterable[str], *args, **kwargs
@@ -198,7 +210,7 @@ def score_texts(
     """
     pipeline = Pipeline()
     predictions = pipeline.prediction(messages)
-    mentions = process_mentions(predictions)
+    mentions = process_data(predictions)
     results = []
     for mention_list in mentions:
       if mention_list:
