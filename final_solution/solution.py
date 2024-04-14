@@ -236,7 +236,10 @@ def predict_with_indices(tsa_pipeline, index_list, text_list):
     Returns:
         A list of lists containing pairs of [index, prediction] for each input group.
     """
+    print(text_list)
     results = []
+    if len(index_list) == 0 or len(text_list) == 0:
+        return results
     for i, bracket in enumerate(index_list):  # Enumerate to get index for text_list
         for index in bracket:
             text = text_list[i]  # Get the correct text for this group
@@ -262,7 +265,7 @@ def score_texts(
     predictions = pipeline.prediction(messages)
     mentions = process_data(predictions)
     tsa_pipline = TSA_pipeline('TSA_inference\TSA_model2', 'TSA_inference\TSA_names.csv')
-    mentions = predict_with_indices(tsa_pipline, mentions, messages)
+    mentions = predict_with_indices(tsa_pipline, mentions, messages['description'].to_list())
     results = []
     for mention_list in mentions:
       if mention_list:
