@@ -1,5 +1,7 @@
 # Требования к интерфейсу
 
+Ссылка на веса: https://drive.google.com/file/d/1Tb8-ksk7LKIHUhVikpB-wFWoMuoPDHMM/view?usp=sharing
+
 Чтобы решение проходило автоматические тесты необходимо чтобы:
 
 * run_me должен запускаться командой 
