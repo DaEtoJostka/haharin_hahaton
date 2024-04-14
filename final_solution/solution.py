@@ -210,6 +210,8 @@ class TSA_pipeline:
     def get_sentiments(self, issureids:list, texts:list):
         df = pd.DataFrame({'issuerid': issureids,
                            'MessageTextClean': texts})
+        df['issuerid'] = df['issuerid'].astype(str)
+        self.names['issuerid'] = df['issuerid'].astype(str)
         df = pd.merge(df, self.names, on="issuerid", how="left")
         df['MessageTextClean'] = df['MessageTextClean'].astype(str)
         df['l_syns'] = df['l_syns'].astype(str)
@@ -219,10 +221,29 @@ class TSA_pipeline:
         df['l_syns'] = df['l_syns'].apply(lambda x: self.f(x))
         
         predictions = self.model.predict(df)
-        
+        print(predictions)
         return predictions[:, 0]
-#Example call
-tsa_pipline = TSA_pipeline('TSA_inference\TSA_model2', 'TSA_inference\TSA_names.csv')
+
+def predict_with_indices(tsa_pipeline, index_list, text_list):
+    """
+    Performs predictions using the provided TSA pipeline and lists of indices and texts.
+
+    Args:
+        tsa_pipeline: An instance of the TSA_pipeline class.
+        index_list: A list of lists containing indices, e.g., [[225],[53],[111]],[[112]].
+        text_list: A list of texts corresponding to the index groups.
+
+    Returns:
+        A list of lists containing pairs of [index, prediction] for each input group.
+    """
+    results = []
+    for i, bracket in enumerate(index_list):  # Enumerate to get index for text_list
+        for index in bracket:
+            text = text_list[i]  # Get the correct text for this group
+            prediction = tsa_pipeline.get_sentiments([index], [text])[0]
+            index.append(prediction)  # Modify the original index list
+        results.append(bracket)  # Append the modified bracket to results
+    return results
 
 def score_texts(
     messages: tp.Iterable[str], *args, **kwargs
@@ -240,6 +261,8 @@ def score_texts(
     pipeline = Pipeline()
     predictions = pipeline.prediction(messages)
     mentions = process_data(predictions)
+    tsa_pipline = TSA_pipeline('TSA_inference\TSA_model2', 'TSA_inference\TSA_names.csv')
+    mentions = predict_with_indices(tsa_pipline, mentions, messages)
     results = []
     for mention_list in mentions:
       if mention_list:
