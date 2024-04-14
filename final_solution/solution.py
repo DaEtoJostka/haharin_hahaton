@@ -180,7 +180,7 @@ Args:
     without duplicates within sublists.
   """
   # Read json dictionary
-  with open("final_solution\dict_of_comp.json", encoding='utf-8') as f:
+  with open("final_solution/dict_of_comp.json", encoding='utf-8') as f:
     company_mapping = json.load(f)
 
   result = []
@@ -262,7 +262,7 @@ def score_texts(
     pipeline = Pipeline()
     predictions = pipeline.prediction(messages)
     mentions = process_data(predictions)
-    tsa_pipline = TSA_pipeline('TSA_inference\TSA_model2', 'TSA_inference\TSA_names.csv')
+    tsa_pipline = TSA_pipeline('TSA_inference/TSA_model2', 'TSA_inference/TSA_names.csv')
     mentions = predict_with_indices(tsa_pipline, mentions, messages['description'].to_list())
     results = []
 
