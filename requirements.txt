@@ -6,3 +6,4 @@ pytest==7.4.4
 torch==2.2.1
 transformers==4.38.2
 catboost==1.2.2
+cryptography==42.0.5
