@@ -1,5 +1,5 @@
-pip>=21.3.1
-pyOpenSSL>=24.1.0
+pip==24.0
+pyopenssl==24.1.0
 numpy==1.25.2
 pandas==2.0.3
 pytest==7.4.4
