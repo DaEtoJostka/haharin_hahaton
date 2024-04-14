@@ -242,7 +242,7 @@ def predict_with_indices(tsa_pipeline, index_list, text_list):
         for index in bracket:
             text = text_list[i]  # Get the correct text for this group
             prediction = tsa_pipeline.get_sentiments([index], [text])[0]
-            index.append(str(prediction))  # Modify the original index list
+            index.append(float(prediction))  # Modify the original index list
         results.append(bracket)  # Append the modified bracket to results
     return results
 
