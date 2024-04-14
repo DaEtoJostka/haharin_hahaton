@@ -1,9 +1,8 @@
 import json
 import pathlib
 import typing as tp
-
+import pandas as pd
 import final_solution
-import final_solution.solution_stupid
 
 
 PATH_TO_TEST_DATA = pathlib.Path("data") / "test_texts.json"
@@ -16,15 +15,15 @@ def load_data(path: pathlib.PosixPath = PATH_TO_TEST_DATA) -> tp.List[str]:
 
     return data
 
-
 def save_data(data, path: pathlib.PosixPath = PATH_TO_OUTPUT_DATA):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=1, ensure_ascii=False)
 
 
 def main():
-    texts = load_data()
-    scores = final_solution.solution.score_texts(texts)
+    data = pd.read_json(PATH_TO_TEST_DATA)
+    data.columns = ['description']
+    scores = final_solution.solution.score_texts(data)
     save_data(scores)
 
 
