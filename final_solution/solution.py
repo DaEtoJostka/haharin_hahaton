@@ -5,6 +5,7 @@ from transformers import BertTokenizer, BertForTokenClassification
 import torch
 from torch import cuda
 import json
+from catboost import CatBoostClassifier
 
 class Pipeline:
     def __init__(self):
@@ -194,6 +195,34 @@ Args:
     result.append(company_indices)
 
   return result
+
+class TSA_pipeline:
+    def __init__(self, model_path, names_path):
+        self.model = CatBoostClassifier()
+        self.model.load_model(model_path)
+        self.names = pd.read_csv(names_path)
+    
+    def f(self, x):
+        x = re.sub(r'([^a-zA-Zа-яА-яёЁ0-9 ])', r' \1 ', x)
+        x = re.sub(r'\s{2,}', ' ', x)
+        return x
+    
+    def get_sentiments(self, issureids:list, texts:list):
+        df = pd.DataFrame({'issuerid': issureids,
+                           'MessageTextClean': texts})
+        df = pd.merge(df, self.names, on="issuerid", how="left")
+        df['MessageTextClean'] = df['MessageTextClean'].astype(str)
+        df['l_syns'] = df['l_syns'].astype(str)
+        del df['issuerid']
+        
+        df['MessageTextClean'] = df['MessageTextClean'].apply(lambda x: self.f(x))
+        df['l_syns'] = df['l_syns'].apply(lambda x: self.f(x))
+        
+        predictions = self.model.predict(df)
+        
+        return predictions[:, 0]
+#Example call
+tsa_pipline = TSA_pipeline('TSA_inference\TSA_model2', 'TSA_inference\TSA_names.csv')
 
 def score_texts(
     messages: tp.Iterable[str], *args, **kwargs
